@@ -8,8 +8,6 @@
 
 using namespace std;
 
-map<string, int> word_count(ifstream&, set<string>);
-
 void initialize_exclusion_set(set<string> &);
 void process_file(map<string, int>&, const set<string>&, ifstream& );
 void user_query(const map<string, int>& );
@@ -17,52 +15,85 @@ void display_word_count(const map<string, int>&, ofstream& );
 
 int main(int argc, char const *argv[])
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        cerr << "correct format: ./3-1.cpp [file_name].\n";
+        cerr << "correct format: ./3-1.o [in_file_name] [out_file_name].\n";
         exit(1);
     }
 
-    string file_name = argv[1];
-    ifstream in_file(file_name);
+    string in_file_name = argv[1];
+    string out_file_name = argv[2];
+    ifstream in_file(in_file_name);
+    ofstream out_file(out_file_name);
 
-    if (!in_file)
+    if (!in_file || !out_file)
     {
         cerr << "unable to open the necessary files!\n";
         exit(1); 
     }
 
-    set<string> word_exclusion = {"a", "an", "or", "the", "and", "but"};
+    set<string> word_exclusion;
+    map<string, int> words_list;
 
-    map<string, int> words_list = word_count(in_file, word_exclusion);
-
-    map<string, int>::iterator it = words_list.begin();
-    for (; it != words_list.end(); it++)
-    {
-        cout << "word: " << it->first << ", "
-            << "count: " << it->second << endl;
-    }
+    initialize_exclusion_set(word_exclusion);
+    process_file(words_list, word_exclusion, in_file);
+    user_query(words_list);
+    display_word_count(words_list, out_file);
 
     return 0;
 }
 
 void initialize_exclusion_set(set<string> &exclusion_set){
     static string _excluded_words[6] = {"a", "an", "or", "the", "and", "but"};
-    
+
+    exclusion_set.insert(_excluded_words, _excluded_words+6);
+    return;
 }
 
-map<string, int> word_count(ifstream &in_file, set<string> exclude_words){
-    istream_iterator<string> is(in_file);
-    istream_iterator<string> eof;
-
-    map<string, int> words_list;
-
-    while(is != eof){
-        if(exclude_words.count(*is))
+void process_file(map<string, int>& wc, const set<string>& exs, ifstream& ifs){
+    string word;
+    while (ifs >> word)
+    {
+        if(exs.count(word))
             continue;
-        words_list[*is]++;
-        is++;
+        wc[word]++;
     }
-
-    return words_list;
+    return;
 }
+
+void user_query(const map<string, int>& wc){
+    string word;
+    cout << "Please enter a word to search: q to quit";
+    cin >> word;
+    while (word.size() && word != "q")
+    {
+        map<string, int>::const_iterator it;
+        if ((it = wc.find(word)) != wc.end())
+        {
+            cout << "Found! " << it->first
+                << " occurs " << it->second
+                << " times.\n";
+        } else
+        {
+            cout << word
+                << " was not found in text.\n";
+        }
+        cout << "Another search?(q to quit)\n";
+        cin >> word;
+    }
+    return;
+}
+
+void display_word_count(const map<string, int>& wc, ofstream& ofs){
+    map<string, int>::const_iterator it = wc.begin(), end = wc.end();
+
+    while (it != end)
+    {
+        ofs << "word: " << it->first
+            << " , count: " << it->second
+            << endl;
+        it++;
+    }
+    return;
+}
+
