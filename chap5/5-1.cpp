@@ -1,35 +1,31 @@
 #include <iostream>
 #include <vector>
+#include "Stack.h"
 
 using namespace std;
 
-class Stack{
-    public:
-        virtual ~Stack(){};
+int main(int argc, char const *argv[])
+{
+    LIFO_Stack ls;
+    int num;
+    cout << ls;
+    ls.push(1);
+    ls.push(2);
+    ls.push(3);
+    ls.push(4);
+    ls.push(5);
 
-        virtual bool pop(int &elem) = 0;
-        virtual bool push(const int &elem) = 0;
-        virtual int size() = 0;
-        bool empty() { return size() == 0;}
-        virtual bool full() = 0;
-        virtual bool peek(int &elem) = 0;
-        virtual void print(ostream &os = cout) = 0;
-};
+    cout << ls;
 
-class LIFO_Stack : public Stack {
-    public:
-        LIFO_Stack(){
-            _top = -1;
-        }
+    ls.peek(num);
 
-        virtual int size() { return _elems.size(); }
+    cout << num << endl;
 
-        virtual bool full() { return _elems.size() == max_size; }
+    cout << ls;
 
-        
+    ls.pop(num);
+    cout << num << endl;
 
-    protected:
-        vector<int> _elems;
-        int _top;
-        const static int max_size = 1024;
-};
+    cout << ls;
+    return 0;
+}
